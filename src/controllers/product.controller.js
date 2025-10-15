@@ -3,6 +3,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import {ApiResponse} from "../utils/ApiResponse.js"
 import { Op } from "sequelize";
+import fs from "fs"
+import csv from "csv-parser"
 
 
 // List Products
@@ -37,4 +39,56 @@ const searchProducts = asyncHandler(async(req, res) => {
     return res.status(200).json(new ApiResponse(200, products, "Filtered products fetched successfully!"));
 })
 
-export {listProducts, searchProducts};
+
+//upload products
+
+const uploadProducts = asyncHandler(async(req, res)=>{
+    if(!req.file){
+        throw new ApiError(400, "No file uploaded");
+    }
+
+    const filePath = req.file.path;
+    const validRows = [];
+    const failedRows = [];
+
+    const stream =  fs.createReadStream(filePath).pipe(csv())
+
+    stream.on("data", (row) => {
+    try {
+      const { sku, name, brand, color, size, mrp, price, quantity } = row;
+
+      if (!sku || !name || !brand || !mrp || !price) {
+        throw new Error("Missing required fields");
+      }
+
+      if (Number(price) > Number(mrp)) {
+        throw new Error("Price cannot exceed MRP");
+      }
+
+      if (Number(quantity) < 0) {
+        throw new Error("Invalid quantity");
+      }
+
+      validRows.push({
+        sku,
+        name,
+        brand,
+        color,
+        size,
+        mrp: parseFloat(mrp),
+        price: parseFloat(price),
+        quantity: parseInt(quantity),
+      });
+    } catch (err) {
+      failedRows.push({ row, error: err.message });
+    }
+  });
+
+  stream.on("end", async() => {
+    await ProductSchema.bulkCreate(validRows, { ignoreDuplicates: true });
+    fs.unlinkSync(filePath);
+    return res.status(200).json(new ApiResponse(200, {stored: validRows.length, failedRows}));
+  });
+})
+
+export {listProducts, searchProducts, uploadProducts};
