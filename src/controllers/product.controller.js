@@ -9,12 +9,27 @@ import csv from "csv-parser"
 
 // List Products
 const listProducts = asyncHandler(async(req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1)*limit;
+    const page = req.query.page ? parseInt(req.query.page) : null;
+    const limit = req.query.limit ? parseInt(req.query.limit) : null;
 
-    const products = ProductSchema.findAll({offset, limit});
+    let products;
 
+    if(page && limit){
+      const offset = (page - 1)*limit;
+      products = await ProductSchema.findAll({offset, limit});
+    } 
+    else if (page) {
+      const offset = (page - 1)*10;
+      products = await ProductSchema.findAll({offset, limit});
+    }
+    else if(limit) {
+      const offset = 0;
+      products = await ProductSchema.findAll({offset, limit});
+    }
+    else {
+      products = await ProductSchema.findAll();
+    }
+     
     return res
         .status(200)
         .json(new ApiResponse(200, products, "Products fetched successfully"));
