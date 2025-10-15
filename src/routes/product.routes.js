@@ -6,7 +6,7 @@ import { listProducts, searchProducts, uploadProducts } from "../controllers/pro
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
-router.post("/upload", upload.single("file"), uploadProducts)
+
 router.get("/", listProducts)
 router.get("/search", searchProducts)
 

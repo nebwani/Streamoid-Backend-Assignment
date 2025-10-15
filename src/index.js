@@ -28,6 +28,6 @@ app.use(express.urlencoded({ extended: true }));
 })();
 
 
-app.use("/api/v1", router);
+app.post("/api/v1/upload", upload.single("file"), uploadProducts);
 app.use("/api/v1/products", router);
 
