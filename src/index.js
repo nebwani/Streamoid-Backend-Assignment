@@ -11,7 +11,7 @@ import { app } from "./app.js";
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const startServer = async () => {
+(async () => {
   try {
     
     await sequelize.sync({ alter: true });
@@ -24,7 +24,5 @@ const startServer = async () => {
     console.error("Failed to start server:", error);
     process.exit(1);
   }
-};
-
-startServer();
+})();
 
