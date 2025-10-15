@@ -12,6 +12,8 @@ import { app } from "./app.js";
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use("/api/v1", router);
+
 (async () => {
   try {
     
@@ -27,7 +29,4 @@ app.use(express.urlencoded({ extended: true }));
   }
 })();
 
-
-app.post("/api/v1/upload", upload.single("file"), uploadProducts);
-app.use("/api/v1/products", router);
 
