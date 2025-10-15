@@ -121,3 +121,5 @@ out/
 .docusaurus
 
 .svelte-kit
+
+uploads/

@@ -1,6 +1,7 @@
 import sequelize from "./db/db.js";
 import dotenv from "dotenv";
 import express from "express"
+import router from "./routes/product.routes.js";
 
 dotenv.config({
     path: './.env'
@@ -25,4 +26,8 @@ app.use(express.urlencoded({ extended: true }));
     process.exit(1);
   }
 })();
+
+
+app.use("/api/v1", router);
+app.use("/api/v1/products", router);
 
